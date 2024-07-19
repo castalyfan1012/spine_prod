@@ -87,7 +87,7 @@ done
 if $ANALYSIS; then
 	PROCESS="ana"
 else
-	PROCESS="mlreco"
+	PROCESS="spine"
 fi
 
 # Parse the suffix
