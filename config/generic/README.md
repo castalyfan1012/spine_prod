@@ -4,7 +4,7 @@ The configurations below have been trained on generic datasets, i.e datasets whi
 
 ## Configurations for MPV/MPR v04
 
-These weights have been trained using the following files:
+These weights have been trained/validated using the following files:
 - Training set: `/sdf/data/neutrino/generic/mpvmpr_2020_01_v04/train.root`
 - Test set: `/sdf/data/neutrino/generic/mpvmpr_2020_01_v04/test.root`
 
