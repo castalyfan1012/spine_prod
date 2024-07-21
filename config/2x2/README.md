@@ -8,7 +8,7 @@ These weights have been trained/validated using the following files:
 - Training set: `/sdf/data/neutrino/2x2/sim/mpvmpr_v1/train_file_list.txt`
 - Test set: `/sdf/data/neutrino/2x2/sim/mpvmpr_v1/test_file_list.txt`
 
-### July 18th 2024
+### July 19th 2024
 
 ```shell
 2x2_full_chain_240719.cfg
