@@ -13,9 +13,11 @@ help()
               [-A | --account]
               [-p | --partition]
               [-G | --gpus]
-              [-G | --cpus-per-task]
+              [--cpus-per-task]
               [-a | --analysis]
               [-f | --flashmatch]
+	      [-d | --debug]
+	      [-l | --larcv]
               [-c | --config CONFIG]
               [-n | --ntasks NUM_TASKS]
               [-t | --time TIME]
@@ -33,11 +35,13 @@ MEM_PER_CPU="4g"
 NUM_TASKS=1
 ANALYSIS=false
 FLASHMATCH=false
+DEBUG=false
+LARCV_BASEDIR=""
 CONFIG=""
 TIME="1:00:00"
 SUFFIX=""
-SHORT_OPTS="A:p:G:n:c:t:s:fah"
-LONG_OPTS="account:,partition:,gpus:,cpus-per-task:,ntasks:,config:,time:,suffix:,flashmatch,analysis,help"
+SHORT_OPTS="A:p:G:n:c:t:s:l:fadh"
+LONG_OPTS="account:,partition:,gpus:,cpus-per-task:,ntasks:,config:,time:,suffix:,larcv:,flashmatch,analysis,debug,help"
 args=$(getopt -o $SHORT_OPTS -l $LONG_OPTS -- "$@")
 eval set -- "$args"
 
@@ -77,6 +81,16 @@ while [ $# -ge 1 ]; do
                         # Flashmatch enable
                         FLASHMATCH=true
                         shift
+                        ;;
+                -d|--debug)
+			# Debug mode enable (does not start the process)
+                        DEBUG=true
+                        shift
+                        ;;
+                -l|--larcv)
+                        # Path to a custom LArCV
+                        LARCV_BASEDIR=$2
+                        shift 2
                         ;;
                 -c|--config)
                         # Configuration file
@@ -224,7 +238,7 @@ for SUB in $(seq $NUM_SUBS); do
 
         # If a LArCV path is provided, source the environment in the singularity
         if [ $LARCV_BASEDIR ]; then
-                BASE_COMMAND="${BASE_COMMAND}source $LARCV_BASEDIR/configure.sh; "
+                BASE_COMMAND="${BASE_COMMAND}unset which; source $LARCV_BASEDIR/configure.sh; "
         fi
 
         # If flash-matching is requested, source the environment in the singularity
@@ -278,7 +292,9 @@ for SUB in $(seq $NUM_SUBS); do
         echo "$BASE_COMMAND -s \$file -o $OUT_PATH -c $CONFIG\"" >> $SCRIPT_PATH
 
         # Execute
-        sbatch $SCRIPT_PATH
+        if ! $DEBUG; then
+            sbatch $SCRIPT_PATH
+	fi
 done
 
 # Done
