@@ -12,11 +12,17 @@ These weights have been trained/validated using the following files:
 
 ```shell
 icarus_full_chain_240719.cfg
+icarus_full_chain_single_240719.cfg
+icarus_full_chain_numi_240719.cfg
+icarus_full_chain_data_240719.cfg
 ```
 
 Description:
   - UResNet + PPN + gSPICE + GrapPAs (track + shower + interaction)
   - Class-weighted loss on PID predictions
+  - The `*_single_*` declination works on single-cryostat simulations
+  - The `*_numi_*` declination has a wider flash matching window (10 us)
+  - The `*_data_*` declination is tailored for data (no labels)
 
 Known issue(s):
   - No obvious issues
