@@ -1,6 +1,6 @@
 # Summary of ICARUS full chain configurations and their characteristics
 
-The configurations below have been trained on a ICARUS MPV/MPR datasets. This summary is divided by training/validation dataset.
+The configurations below have been trained on ICARUS MPV/MPR datasets. This summary is divided by training/validation dataset.
 
 ## Configurations for MPV/MPR v02
 
@@ -25,4 +25,4 @@ Description:
   - The `*_data_*` declination is tailored for data (no labels)
 
 Known issue(s):
-  - No obvious issues
+  - The shower start point prediction of electron showers is problematic due to the way PPN labeling is trained

@@ -18,4 +18,4 @@ Description:
   - UResNet + PPN + gSPICE + GrapPAs (track + shower + interaction)
 
 Known issue(s):
-  - The shower start point prediction of electron showers is problematic due to the way PPN labeling is currently set up
+  - The shower start point prediction of electron showers is problematic due to the way PPN labeling is trained

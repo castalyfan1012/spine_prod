@@ -23,3 +23,4 @@ Description:
 
 Known issue(s):
   - Module 2 packets are simply wrong (performance in that module is terrible, may affect others)
+  - The shower start point prediction of electron showers is problematic due to the way PPN labeling is trained
