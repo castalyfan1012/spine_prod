@@ -26,3 +26,23 @@ Description:
 
 Known issue(s):
   - The shower start point prediction of electron showers is problematic due to the way PPN labeling is trained
+
+### August 12th 2024
+
+```shell
+icarus_full_chain_240812.cfg
+icarus_full_chain_single_240812.cfg
+icarus_full_chain_numi_240812.cfg
+icarus_full_chain_data_240812.cfg
+```
+
+Description:
+  - UResNet + PPN + gSPICE + GrapPAs (track + shower + interaction)
+  - Class-weighted loss on PID predictions
+  - The `*_single_*` declination works on single-cryostat simulations
+  - The `*_numi_*` declination has a wider flash matching window (10 us)
+  - The `*_data_*` declination is tailored for data (no labels)
+
+Known issue(s):
+  - Resolves the issue with the PPN target in the previous set of weights
+  - No other known issue
