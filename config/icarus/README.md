@@ -45,4 +45,5 @@ Description:
 
 Known issue(s):
   - Resolves the issue with the PPN target in the previous set of weights
+  - Removed PPN-based end point predictions
   - No other known issue

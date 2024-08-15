@@ -23,3 +23,20 @@ Description:
 Known issue(s):
   - The shower start point prediction of electron showers is problematic due to the way PPN labeling is trained
   - Flashes but no flash matching
+
+### August 14th 2024
+
+```shell
+sbnd_full_chain_240814.cfg
+sbnd_full_chain_data_240814.cfg
+```
+
+Description:
+  - UResNet + PPN + gSPICE + GrapPAs (track + shower + interaction)
+  - Class-weighted loss on PID predictions
+  - The `*_data_*` declination is tailored for data (no labels)
+
+Known issue(s):
+  - Resolves the issue with the PPN target in the previous set of weights
+  - Removed PPN-based end point predictions
+  - No other known issue
