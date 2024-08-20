@@ -34,6 +34,8 @@ icarus_full_chain_240812.cfg
 icarus_full_chain_single_240812.cfg
 icarus_full_chain_numi_240812.cfg
 icarus_full_chain_data_240812.cfg
+icarus_full_chain_co_240812.cfg
+icarus_full_chain_data_co_240812.cfg
 ```
 
 Description:
@@ -42,6 +44,8 @@ Description:
   - The `*_single_*` declination works on single-cryostat simulations
   - The `*_numi_*` declination has a wider flash matching window (10 us)
   - The `*_data_*` declination is tailored for data (no labels)
+  - The `*_co_*` declination only uses collection charge
+  - The `*_data_co_*` is tailored for data and only uses collection charge
 
 Known issue(s):
   - Resolves the issue with the PPN target in the previous set of weights
