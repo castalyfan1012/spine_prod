@@ -14,6 +14,7 @@ help()
               [-p | --partition]
               [-G | --gpus]
               [--cpus-per-task]
+	      [--files-per-task]
               [-a | --analysis]
               [-f | --flashmatch]
 	      [-d | --debug]
@@ -31,6 +32,7 @@ ACCOUNT="neutrino:icarus-ml"
 PARTITION="turing"
 GPUS=1
 CPUS_PER_TASK=4
+FILES_PER_TASK=1
 MEM_PER_CPU="4g"
 NUM_TASKS=1
 ANALYSIS=false
@@ -41,7 +43,7 @@ CONFIG=""
 TIME="1:00:00"
 SUFFIX=""
 SHORT_OPTS="A:p:G:n:c:t:s:l:fadh"
-LONG_OPTS="account:,partition:,gpus:,cpus-per-task:,ntasks:,config:,time:,suffix:,larcv:,flashmatch,analysis,debug,help"
+LONG_OPTS="account:,partition:,gpus:,cpus-per-task:,files-per-task:,ntasks:,config:,time:,suffix:,larcv:,flashmatch,analysis,debug,help"
 args=$(getopt -o $SHORT_OPTS -l $LONG_OPTS -- "$@")
 eval set -- "$args"
 
@@ -70,6 +72,11 @@ while [ $# -ge 1 ]; do
                 --cpus-per-task)
                         # Number of CPUs
                         CPUS_PER_TASK=$2
+                        shift 2
+                        ;;
+                --files-per-task)
+                        # Number of CPUs
+                        FILES_PER_TASK=$2
                         shift 2
                         ;;
                 -a|--analysis)
@@ -178,29 +185,53 @@ for f in $FILE_LIST; do
         fi
 done
 
-# If the number of input files exeed the maximum submission array for Slurm,
+# Define the number of files groups to build based on the number of files per
+# task and redifine the number of files per task to optimize execution time
+NUM_FILE_GROUPS=$((($NUM_FILES - 1)/$FILES_PER_TASK + 1))
+FILES_PER_GROUP=()
+for GROUP_ID in $(seq 0 $(($NUM_FILE_GROUPS - 1))); do
+	NUM_GROUP_FILES=$(($NUM_FILES/$NUM_FILE_GROUPS))
+	if [[ $(($NUM_FILES % $NUM_FILE_GROUPS)) -gt $GROUP_ID ]]; then
+		NUM_GROUP_FILES=$(($NUM_GROUP_FILES + 1))
+	fi
+	FILES_PER_GROUP+=($NUM_GROUP_FILES)
+done
+
+# Parse the number of tasks (processes) to spawn. If the number of processes
+# is smaller than the number of files, they will be queued.
+if [[ $NUM_TASKS -gt $NUM_FILE_GROUPS ]]; then
+        # If there are more processes than file groups, lower number of processes
+        NUM_TASKS=$NUM_FILE_GROUPS
+elif [[ $NUM_TASKS -lt 1 ]]; then
+        # If the number of tasks is -1, spawn as many tasks as there are files 
+        NUM_TASKS=$NUM_FILE_GROUPS
+fi
+
+# Figure out how many file groups to provide in each task
+GROUPS_PER_TASK=()
+for TASK_ID in $(seq 0 $(($NUM_TASKS - 1))); do
+	NUM_GROUPS=$(($NUM_FILE_GROUPS/$NUM_TASKS))
+	if [[ $(($NUM_FILE_GROUPS % $NUM_TASKS)) -gt $TASK_ID ]]; then
+		NUM_GROUPS=$(($NUM_GROUPS + 1))
+	fi
+	GROUPS_PER_TASK+=($NUM_GROUPS)
+done
+
+# If the number of input file groups exeed the maximum submission array for Slurm,
 # must make multiple submissions. Check there's enough processes available
-MAX_ARRAY_SIZE=90
-NUM_SUBS=$(($NUM_FILES/$MAX_ARRAY_SIZE + 1))
+MAX_ARRAY_SIZE=99
+NUM_SUBS=$((($NUM_FILE_GROUPS - 1)/$MAX_ARRAY_SIZE + 1))
 if [[ $NUM_SUBS -gt $NUM_TASKS ]]; then
         echo Must have at least as many processes as submissions
         echo Cannot launch $NUM_SUBS submissions on $NUM_TASKS processes
         exit 0
 fi
-
-# Parse the number of tasks (processes) to spawn. If the number of processes
-# is smaller than the number of files, they will be queued.
-if [[ $NUM_TASKS -gt $NUM_FILES ]]; then
-        # If there are more processes than files, lower number of processes
-        NUM_TASKS=$NUM_FILES
-elif [[ $NUM_TASKS -lt 1 ]]; then
-        # If the number of tasks is -1, spawn as many tasks as there are files 
-        NUM_TASKS=$NUM_FILES
-fi
-echo Will spawn $NUM_TASKS job\(s\) in $NUM_SUBS submission\(s\)
+echo Will process $NUM_FILES file\(s\) in $NUM_FILE_GROUPS job\(s\) using $NUM_TASKS parallel task\(s\) in $NUM_SUBS array\(s\) 
 
 # Launch submissions
-LAST_ID=0
+TASK_ID=0
+GROUP_ID=0
+FILE_ID=0
 DATETIME=$(date +"%Y%m%d_%H%M%S_%N")
 for SUB in $(seq $NUM_SUBS); do
 
@@ -210,28 +241,25 @@ for SUB in $(seq $NUM_SUBS); do
                 SUB_NUM_TASKS=$(($SUB_NUM_TASKS + 1))
         fi
 
-        # Figure out the IDs of the files to process in this batch
-        FIRST_ID=$LAST_ID
-        LAST_ID=$(($FIRST_ID+$SUB_NUM_TASKS*($NUM_FILES/$NUM_TASKS)))
-        LEFTOVER=$(($NUM_FILES%$NUM_TASKS))
-        if [[ $LEFTOVER -ge $NUM_SUBS ]]; then
-                LAST_ID=$(($LAST_ID + $LEFTOVER/$NUM_SUBS))
-        fi
-        if [[ $(($LEFTOVER%$NUM_SUBS)) -gt $(($SUB-1)) ]]; then
-                LAST_ID=$(($LAST_ID + 1))
-        fi
-
-        SUB_NUM_FILES=$((LAST_ID-FIRST_ID))
-
         # Build a table that maps the SLURM_ARRAY_TASK_ID to a file
         MAP_PATH="file_map_prod_${SUFFIX}_${DATETIME}_${SUB}.txt"
         CNTR=1
 
         echo "ArrayTaskID FilePath" > $MAP_PATH
-        for FILE_ID in $(seq $FIRST_ID $(($LAST_ID-1))); do
-                      echo $CNTR ${FILES[FILE_ID]} >> $MAP_PATH
-                CNTR=$((CNTR+1))
-        done
+	for TASK_ID in $(seq $TASK_ID $(($TASK_ID + $SUB_NUM_TASKS - 1))); do
+		for GROUP_ID in $(seq $GROUP_ID $(($GROUP_ID + ${GROUPS_PER_TASK[$TASK_ID]} - 1))); do
+			echo -n $CNTR" " >> $MAP_PATH
+			for FILE_ID in $(seq $FILE_ID $(($FILE_ID + ${FILES_PER_GROUP[$GROUP_ID]} - 1))); do
+				echo -n ${FILES[$FILE_ID]}, >> $MAP_PATH
+			done
+			echo "" >> $MAP_PATH # Carriage return
+			FILE_ID=$((FILE_ID + 1))
+			CNTR=$((CNTR+1))
+		done
+		GROUP_ID=$((GROUP_ID + 1))
+	done
+
+	TASK_ID=$(($TASK_ID + 1))
 
         # Define the base command to execute
         BASE_COMMAND="singularity exec --bind /sdf/,/fs/ --nv $SINGULARITY_PATH bash -c \""
@@ -255,11 +283,11 @@ for SUB in $(seq $NUM_SUBS); do
         # Construct submission script
         SCRIPT_PATH="submit_prod_${SUFFIX}_${DATETIME}_${SUB}.sh"
 
-        mkdir -p output_$SUFFIX
-        OUT_PATH="output_$SUFFIX/\${filename}_${SUFFIX}.h5"
-
         mkdir -p batch_logs
         LOG_PREFIX="batch_logs/prod_${SUFFIX}_%A_%a"
+
+        mkdir -p output_$SUFFIX
+	OUTPUT_NAME="output_$SUFFIX/spine.h5"
 
 	echo "#!/bin/bash" >> $SCRIPT_PATH
 	echo "" >> $SCRIPT_PATH
@@ -273,7 +301,7 @@ for SUB in $(seq $NUM_SUBS); do
         echo "#SBATCH --gpus=$GPUS" >> $SCRIPT_PATH
         echo "" >> $SCRIPT_PATH
 
-        echo "#SBATCH --array=1-$SUB_NUM_FILES%$SUB_NUM_TASKS" >> $SCRIPT_PATH
+	echo "#SBATCH --array=1-$(($CNTR - 1))%$SUB_NUM_TASKS" >> $SCRIPT_PATH
         echo "" >> $SCRIPT_PATH
 
         echo "#SBATCH --job-name=prod_$SUFFIX" >> $SCRIPT_PATH
@@ -285,11 +313,10 @@ for SUB in $(seq $NUM_SUBS); do
         echo "" >> $SCRIPT_PATH
 
         echo "file=\$(awk -v ArrayTaskID=\$SLURM_ARRAY_TASK_ID '\$1==ArrayTaskID {print \$2}' \$map)" >> $SCRIPT_PATH
-        echo "filename=\$(basename -- \"\$file\")" >> $SCRIPT_PATH
-        echo "filename=\"\${filename%.*}\"" >> $SCRIPT_PATH
+	echo "file=\${file//,/\ }" >> $SCRIPT_PATH
         echo "" >> $SCRIPT_PATH
 
-        echo "$BASE_COMMAND -s \$file -o $OUT_PATH -c $CONFIG\"" >> $SCRIPT_PATH
+        echo "$BASE_COMMAND -s \$file -o $OUTPUT_NAME -c $CONFIG\"" >> $SCRIPT_PATH
 
         # Execute
         if ! $DEBUG; then
