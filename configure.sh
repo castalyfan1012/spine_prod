@@ -10,11 +10,11 @@ fi
 
 export MLPROD_CFGDIR=$MLPROD_BASEDIR/config
 
-# Define path to lartc_mlreco3d
-export SPINE_BASEDIR=/sdf/home/b/bearc/spine_fmatch/spine
+# Define path to SPINE
+export SPINE_BASEDIR=/sdf/data/neutrino/software/spine
 
 # Define path to OpT0Finder
-export FMATCH_BASEDIR=/sdf/group/neutrino/bearc/OpT0Finder/
+export FMATCH_BASEDIR=/sdf/data/neutrino/software/OpT0Finder
 
 # Define path to the singularity container
 #export SINGULARITY_PATH=/sdf/group/neutrino/images/develop.sif # SLOW
