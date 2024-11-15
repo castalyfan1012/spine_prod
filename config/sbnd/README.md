@@ -2,7 +2,7 @@
 
 The configurations below have been trained on SBND MPV/MPR datasets. This summary is divided by training/validation dataset.
 
-## Configurations for MPV/MPR v02
+## Configurations for MPV/MPR v01
 
 These weights have been trained/validated using the following files:
 - Training set: `/sdf/data/neutrino/sbnd/simulation/mpvmpr_v01/train.list`
@@ -35,6 +35,24 @@ Description:
   - UResNet + PPN + gSPICE + GrapPAs (track + shower + interaction)
   - Class-weighted loss on PID predictions
   - The `*_data_*` declination is tailored for data (no labels)
+
+Known issue(s):
+  - Resolves the issue with the PPN target in the previous set of weights
+  - Removed PPN-based end point predictions
+  - No other known issue
+
+### September 18th 2024
+
+```shell
+sbnd_full_chain_240918.cfg
+sbnd_full_chain_data_240918.cfg
+```
+
+Description:
+  - UResNet + PPN + gSPICE + GrapPAs (track + shower + interaction)
+  - Class-weighted loss on PID predictions
+  - The `*_data_*` declination is tailored for data (no labels)
+  - This is the first configuration which **includes flash matching**
 
 Known issue(s):
   - Resolves the issue with the PPN target in the previous set of weights
