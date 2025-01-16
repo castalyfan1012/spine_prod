@@ -14,6 +14,7 @@ help()
               [-p | --partition]
               [-G | --gpus]
               [--cpus-per-task]
+              [--mem-per-cpu]
 	      [--files-per-task]
               [-a | --analysis]
               [-f | --flashmatch]
@@ -31,9 +32,9 @@ help()
 ACCOUNT="neutrino:icarus-ml"
 PARTITION="turing"
 GPUS=1
-CPUS_PER_TASK=4
+CPUS_PER_TASK=-1
 FILES_PER_TASK=1
-MEM_PER_CPU="4g"
+MEM_PER_CPU=""
 NUM_TASKS=1
 ANALYSIS=false
 FLASHMATCH=false
@@ -43,7 +44,7 @@ CONFIG=""
 TIME="1:00:00"
 SUFFIX=""
 SHORT_OPTS="A:p:G:n:c:t:s:l:fadh"
-LONG_OPTS="account:,partition:,gpus:,cpus-per-task:,files-per-task:,ntasks:,config:,time:,suffix:,larcv:,flashmatch,analysis,debug,help"
+LONG_OPTS="account:,partition:,gpus:,cpus-per-task:,mem-per-cpu:,files-per-task:,ntasks:,config:,time:,suffix:,larcv:,flashmatch,analysis,debug,help"
 args=$(getopt -o $SHORT_OPTS -l $LONG_OPTS -- "$@")
 eval set -- "$args"
 
@@ -72,6 +73,11 @@ while [ $# -ge 1 ]; do
                 --cpus-per-task)
                         # Number of CPUs
                         CPUS_PER_TASK=$2
+                        shift 2
+                        ;;
+                --mem-per-cpu)
+                        # Memory per CPU
+                        MEM_PER_CPU=$2
                         shift 2
                         ;;
                 --files-per-task)
@@ -125,6 +131,24 @@ while [ $# -ge 1 ]; do
                         ;;
         esac
 done
+
+# If not explicitely specified, base the number of CPU cores
+# and the memory assigned per CPU on the partition
+if [[ $CPUS_PER_TASK -le 0 ]]; then
+	if [[ $PARTITION == "ampere" ]]; then
+		CPUS_PER_TASK=28
+	elif [[ $PARTITION == "turing" ]]; then
+		CPUS_PER_TASK=4
+	fi
+fi
+
+if [[ $MEM_PER_CPU == "" ]]; then
+	if [[ $PARTITION == "ampere" ]]; then
+		MEM_PER_CPU="8g"
+	elif [[ $PARTITION == "turing" ]]; then
+		MEM_PER_CPU="4g"
+	fi
+fi
 
 # Determine which process to call
 if $ANALYSIS; then
@@ -287,7 +311,7 @@ for SUB in $(seq $NUM_SUBS); do
         LOG_PREFIX="batch_logs/prod_${SUFFIX}_%A_%a"
 
         mkdir -p output_$SUFFIX
-	OUTPUT_NAME="output_$SUFFIX/spine.h5"
+	OUTPUT_NAME="output_$SUFFIX/$SUFFIX.h5"
 
 	echo "#!/bin/bash" >> $SCRIPT_PATH
 	echo "" >> $SCRIPT_PATH
