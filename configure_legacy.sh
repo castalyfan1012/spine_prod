@@ -18,8 +18,9 @@ export FMATCH_BASEDIR=/sdf/data/neutrino/software/OpT0Finder_legacy
 #export FMATCH_BASEDIR=/sdf/data/neutrino/software/OpT0Finder
 
 # Define path to the singularity container
-export SINGULARITY_PATH=/sdf/group/neutrino/images/larcv2_ub20.04-cuda11.6-pytorch1.13-larndsim.sif
+#export SINGULARITY_PATH=/sdf/group/neutrino/images/larcv2_ub20.04-cuda11.6-pytorch1.13-larndsim.sif
 #export SINGULARITY_PATH=/sdf/group/neutrino/images/larcv2_ub22.04-cuda12.1-pytorch2.4.0-larndsim-2024-09-03.sif
+export SINGULARITY_PATH=/sdf/group/neutrino/images/larcv2_ub2204-cuda121-torch251-larndsim.sif
 
 echo
 printf "\033[93mMLPROD\033[00m FYI shell env. may useful for external packages:\n"
