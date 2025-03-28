@@ -13,6 +13,8 @@ These weights have been trained using the following files at Polaris:
 - Training set: `/lus/eagle/projects/neutrinoGPU/bearc/simulation/mpvmpr_v02/train/files.txt` (255k)
 - Test set: `/lus/eagle/projects/neutrinoGPU/bearc/simulation/mpvmpr_v02/test/larcv/files.txt` (68k)
 
+...using the configs in the [sbnd_spine_train](https://github.com/bear-is-asleep/sbnd_spine_train/tree/master) repo.
+
 Training samples MPVMPR using `sbndcode v10_04_01` which can be found [here](https://github.com/SBNSoftware/sbndcode/tree/v10_04_01) . The training samples are generated using the following fcls:
 ```
 run_mpvmpr_sbnd.fcl
