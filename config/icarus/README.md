@@ -82,6 +82,7 @@ Description:
   - The `*_data_*` declinations are tailored for data (no labels)
   - The `*_lite_*` declinations output directly to lite files
   - The `*_single_*` declination works on single-cryostat simulations
+  - The `*_unblind_*` declination only processes unblinded data
 
 Known issue(s):
   - Resolves the issue with the first induction plane gain
