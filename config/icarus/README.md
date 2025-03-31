@@ -67,11 +67,18 @@ These weights have been trained/validated using the following files:
 ```shell
 icarus_full_chain_250115.cfg
 icarus_full_chain_co_250115.cfg
+icarus_full_chain_co_lite_250115.cfg
 icarus_full_chain_numi_250115.cfg
+icarus_full_chain_co_numi_250115.cfg
 icarus_full_chain_single_250115.cfg
+icarus_full_chain_single_co_250115.cfg
+icarus_full_chain_co_4ms_lite_250115.cfg
+icarus_full_chain_co_8ms_lite_250115.cfg
 icarus_full_chain_data_250115.cfg
-icarus_full_chain_data_numi_250115.cfg
 icarus_full_chain_data_co_250115.cfg
+icarus_full_chain_data_co_lite_250115.cfg
+icarus_full_chain_data_co_unblind_lite_250115.cfg
+icarus_full_chain_data_numi_250115.cfg
 ```
 
 Description:
@@ -92,20 +99,18 @@ Known issue(s):
 ### March 3rd 2025 
 
 ```shell
-icarus_full_chain_250115.cfg
-icarus_full_chain_co_250115.cfg
-icarus_full_chain_co_lite_250115.cfg
-icarus_full_chain_numi_250115.cfg
-icarus_full_chain_co_numi_250115.cfg
-icarus_full_chain_single_250115.cfg
-icarus_full_chain_single_co_250115.cfg
-icarus_full_chain_co_4ms_lite_250115.cfg
-icarus_full_chain_co_8ms_lite_250115.cfg
-icarus_full_chain_data_250115.cfg
-icarus_full_chain_data_co_250115.cfg
-icarus_full_chain_data_co_lite_250115.cfg
-icarus_full_chain_data_co_unblind_lite_250115.cfg
-icarus_full_chain_data_numi_250115.cfg
+icarus_full_chain_co_250303.cfg
+icarus_full_chain_co_lite_250303.cfg
+icarus_full_chain_co_numi_250303.cfg
+icarus_full_chain_single_co_250303.cfg
+icarus_full_chain_co_4ms_lite_250303.cfg
+icarus_full_chain_co_8ms_lite_250303.cfg
+icarus_full_chain_co_transp_lite_250303.cfg
+icarus_full_chain_data_250303.cfg
+icarus_full_chain_data_co_250303.cfg
+icarus_full_chain_data_co_lite_250303.cfg
+icarus_full_chain_data_co_unblind_lite_250303.cfg
+icarus_full_chain_data_co_numi_250303.cfg
 ```
 
 Description:
@@ -115,12 +120,12 @@ Description:
   - The `*_numi_*` declinations are tailored for NuMI (10 us beam window for FM)
   - The `*_4ms_*` declinations are tailored for 4ms lifetime variations
   - The `*_8ms_*` declinations are tailored for 8ms lifetime variations
+  - The `*_transp_*` declinations are tailored for the YZ transparency variations
   - The `*_data_*` declinations are tailored for data (no labels)
   - The `*_lite_*` declinations output directly to lite files
   - The `*_single_*` declination works on single-cryostat simulations
   - The `*_unblind_*` declination only processes unblinded data
 
 Known issue(s):
-  - Resolves the issue with the first induction plane gain
-  - Uses correct calibration constant (courtesy of Lane Kashur)
+  - Moved all calibrations upstream of the full chain (for the better!)
   - No other known issue
